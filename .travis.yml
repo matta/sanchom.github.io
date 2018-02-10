@@ -1,0 +1,27 @@
+sudo: required
+
+language: python
+
+branches:
+  only:
+  - master-source
+
+services:
+  - docker
+
+script:
+  - cd ../
+  - docker pull sanchom/pollen
+  - docker run --rm -v `pwd`:/work -w /work sanchom/pollen raco pollen render -r sanchom.github.io
+  - docker run --rm -v `pwd`:/work -w /work sanchom/pollen raco pollen publish sanchom.github.io published
+
+deploy:
+  provider: pages
+  skip-cleanup: true
+  keep-history: true
+  local-dir: ../published
+  target-branch: master
+  committer-from-gh: true
+  github-token: $GITHUB_TOKEN
+  on:
+    branch: master-source
