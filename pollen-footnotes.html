@@ -150,7 +150,49 @@ la­bel.side­note-num­ber { dis­play: in­line; }
   }
 
   la­bel { cur­sor: point­er; }
-}</pre></blockquote><h2 hyphens="none">Not done yet</h2><p>This will prob­a­bly nev­er be done, but next, I want to make bet­ter use of HTML5’s se­man­tic tags, like <span class="code">aside</span> and <span class="code">cite</span>.</p><h2 hyphens="none">Other approaches</h2><p>It’s al­ways in­ter­est­ing to see so­lu­tions that oth­ers have come up with. A <a href="https://groups.google.com/forum/#!topic/pollenpub/laWL4SWx0Zc">post by Joel Dueck</a> on the <a href="https://groups.google.com/forum/#!forum/pollenpub">pol­len­pub Google group</a> is ac­tu­al­ly what prompt­ed me to write this. I’ll try to keep a lit­tle list here of al­ter­na­tive ap­proach­es.</p><div class="endnotes print-only"><h2 hyphens="none">Notes</h2><p class="footnote" id="fn-1">1. <a href="#fn-source-1" class="backlink undecorated"> ⌃ </a>You can look
+}</pre></blockquote><h2 hyphens="none">Commas</h2><p>I also want­ed to have Pollen au­to­mat­i­cal­ly de­tect se­ries of con­sec­u­tive <span class="code">◊note</span> tags and in­sert com­mas in be­tween them.<span class="sidenote-wrapper"><span><label for="fn-5" class="margin-toggle sidenote-number"></label><input type="checkbox" id="fn-5" class="margin-toggle"/><input type="checkbox" id="fn-5-expand" class="margin-expand"/><label for="fn-5-expand" class="sidenote" hyphens="none">Like</label></span></span><span class="sidenote-comma">,</span><span class="sidenote-wrapper"><span><label for="fn-6" class="margin-toggle sidenote-number"></label><input type="checkbox" id="fn-6" class="margin-toggle"/><input type="checkbox" id="fn-6-expand" class="margin-expand"/><label for="fn-6-expand" class="sidenote" hyphens="none">this.</label></span></span> My so­lu­tion was to wrap the en­tire set of tags that get in­sert­ed due to a <span class="code">◊note</span> tag with a <span class="code">&lt;span class=“side­note-wrap­per”&gt;[…]&lt;/span&gt;</span>. So, whether it’s a link to a foot­note, or a quadru­ple of el­e­ments that en­able the side­note be­hav­iour, it gets wrapped with that tag. This gives the Pollen de­coder some­thing to look for—some­thing to in­sert com­mas be­tween.</p><p>I im­ple­ment­ed this as a <span class="code">tx­ex­pr-proc</span> that runs dur­ing the de­code of the root el­e­ment.</p><blockquote class="code"><pre class="code">(define (in­sert-side­note-com­mas tx) ; Will run on every tx­ex­pr.
+  ; Just defining some helper func­tions.
+  (define (is-trig­ger-triple? x y z)
+    (and (is-side­note-wrap­per? x)
+         (string? y)
+         (equal? (string-trim y) "")
+         (is-side­note-wrap­per? z)))
+  (define (is-trig­ger-dou­ble? x y)
+    (and (is-side­note-wrap­per? x)
+                        (is-side­note-wrap­per? y)))
+  (define (is-side­note-wrap­per? tx)
+    (and (tx­ex­pr? tx)
+         (at­trs-have-key? tx 'class)
+         (equal? (attr-ref tx 'class) "side­note-wrap­per")))
+  ; The func­tion will pass over the el­e­ments (chil­dren)
+  ; of the tx­ex­pr, look­ing for suc­ces­sive side­note el­e­ments
+  ; be­tween which to put a com­ma.
+  (define el­e­ments (get-el­e­ments tx))
+  (tx­ex­pr (get-tag tx) (get-at­trs tx)
+          (let loop ([re­sult emp­ty]
+                     [el­e­ments el­e­ments])
+            (if (emp­ty? el­e­ments) ; If only zero items.
+                re­sult
+                (if (emp­ty? (cdr el­e­ments)) ; If only one item in el­e­ments.
+                    (ap­pend re­sult el­e­ments)
+                    (let ([x (car el­e­ments)]
+                          [y (cadr el­e­ments)])
+                      (if (emp­ty? (cddr el­e­ments)) ; If only two items in el­e­ments.
+                          ; If they're both span.side­note-wrap­per, put the first one plus a com­ma into
+                          ; re­sults, then re­curse, oth­er­wise, just put the first one into re­sults and
+                          ; re­curse.
+                          (if (is-trig­ger-dou­ble? x y)
+                              (loop (ap­pend re­sult (list x '(span [[class "side­note-com­ma"]] ","))) (cdr el­e­ments))
+                              (loop (ap­pend re­sult (list x)) (cdr el­e­ments)))
+                          ; Otherwise, there are at least three items in el­e­ments; check whether the first two
+                          ; are suc­ces­sive side­notes, or whether the three to­geth­er are a se­quence like:
+                          ; (side­note white­space side­note).
+                          (let ([z (cad­dr el­e­ments)])
+                            (if (is-trig­ger-dou­ble? x y)
+                                (loop (ap­pend re­sult (list x '(span [[class "side­note-com­ma"]] ","))) (cdr el­e­ments))
+                                (if (is-trig­ger-triple? x y z)
+                                    (loop (ap­pend re­sult (list x '(span [[class "side­note-com­ma"]] ","))) (cddr el­e­ments))
+                                    (loop (ap­pend re­sult (list x)) (cdr el­e­ments))))))))))))</pre></blockquote><p>The nest­ing got a lit­tle crazy there, but this was fun to think about and write. The <a href="https://docs.racket-lang.org/guide/let.html#%28part._.Named_let%29"><span class="code">named-let</span></a> is a way to do tail-re­cur­sion.</p><h2 hyphens="none">Not done yet</h2><p>This will prob­a­bly nev­er be done, but next, I want to make bet­ter use of HTML5’s se­man­tic tags, like <span class="code">aside</span> and <span class="code">cite</span>.</p><h2 hyphens="none">Other approaches</h2><p>It’s al­ways in­ter­est­ing to see so­lu­tions that oth­ers have come up with. A <a href="https://groups.google.com/forum/#!topic/pollenpub/laWL4SWx0Zc">post by Joel Dueck</a> on the <a href="https://groups.google.com/forum/#!forum/pollenpub">pol­len­pub Google group</a> is ac­tu­al­ly what prompt­ed me to write this. I’ll try to keep a lit­tle list here of al­ter­na­tive ap­proach­es.</p><div class="endnotes print-only"><h2 hyphens="none">Notes</h2><p class="footnote" id="fn-1">1. <a href="#fn-source-1" class="backlink undecorated"> ⌃ </a>You can look
 at the full source code at <a href="https://github.com/sanchom/sanchom.github.io">github.com</a>. It has
 probably changed since I wrote this, so to browse the source at the
 time of this writing, see <a href="https://github.com/sanchom/sanchom.github.io/tree/fb2836e38fb781b1c827478b085788de3beb51d9">this
@@ -160,6 +202,6 @@ children, but that's alright. If I'm inserting block elements into a
 note, it probably shouldn't be a note.</p><p class="footnote" id="fn-3">3. <a href="#fn-source-3" class="backlink undecorated"> ⌃ </a>If you're not already reading this on a small screen, you
 can preview this behaviour by narrowing this browser window.</p><p class="footnote" id="fn-4">4. <a href="#fn-source-4" class="backlink undecorated"> ⌃ </a>When you have many sidenotes in
 quick succession, if they aren't truncated, the later sidenotes end up
-being placed far from their anchors.</p></div></root>
+being placed far from their anchors.</p><p class="footnote" id="fn-5">5. <a href="#fn-source-5" class="backlink undecorated"> ⌃ </a>Like</p><p class="footnote" id="fn-6">6. <a href="#fn-source-6" class="backlink undecorated"> ⌃ </a>this.</p></div></root>
   </body>
 </html>
