@@ -70,6 +70,8 @@ a.undecorated:link {text-decoration: none; background: none;}
 a.undecorated:visited {text-decoration: none; background: none;}
 a.undecorated:hover {text-decoration: none; background: none;}
 
+span.bibliography-entry::before { position: absolute; content: "📃"; margin-left: -2.5rem; padding-top: 0.2em; font-size: 0.75rem;}
+
 img.little-logo { float: left; margin-right: 1em; margin-bottom: 1em; }
 
 img.thumbnail { float: left; margin-right: 1em; margin-bottom: 1em; margin-top: 0.5em; width: 150px;}
