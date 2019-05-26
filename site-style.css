@@ -35,6 +35,7 @@
 
 
 
+
 @media all {html {font-size: 22px;}}
 @media all and (max-width:920px){html {font-size:22px;}}
 @media all and (max-width:880px){html {font-size:21px;}}
@@ -147,7 +148,7 @@ td.intervener-cell { font-size: 0.6rem; }
 
 .sidenote, .margin-note, p.date {
 text-align: left;
-color: #373737;
+color: #474747;
 float: right;
 clear: right;
 margin-right: -40%;
@@ -255,7 +256,7 @@ margin-top: 1.5rem;
 width: 100%;
 float: none;
 clear: none;
-color: #373737;
+color: #474747;
 position: static;
 font-size: 0.7rem;
 }
@@ -314,6 +315,13 @@ tr { border-top: 1px solid grey; }
 
 a:link {
 text-decoration: underline;
+background: #ffffff;
+-webkit-background-size: 0.05em 1px, 0.05em 1px, 1px 1px;
+-moz-background-size: 0.05em 1px, 0.05em 1px, 1px 1px;
+background-size: 0.05em 1px, 0.05em 1px, 1px 1px;
+background-repeat: no-repeat, no-repeat, repeat-x;
+text-shadow: 0.03em 0 #ffffff, -0.03em 0 #ffffff, 0 0.03em #ffffff, 0 -0.03em #ffffff, 0.06em 0 #ffffff, -0.06em 0 #ffffff, 0.09em 0 #ffffff, -0.09em 0 #ffffff, 0.12em 0 #ffffff, -0.12em 0 #ffffff, 0.15em 0 #ffffff, -0.15em 0 #ffffff;
+background-position: 0% 93%, 100% 93%, 0% 93%;
 }
 
 .sidenote, .margin-expand:checked + .sidenote, .backlink, div.header { display: none; }
@@ -325,7 +333,7 @@ margin-top: 1.5rem;
 width: 100%;
 float: none;
 clear: none;
-color: #373737;
+color: #474747;
 position: static;
 font-size: 0.7rem;
 }
@@ -343,7 +351,7 @@ font-family: 'Source Serif Pro', serif;
 }
 .margin-note {
 text-align: left;
-color: #373737;
+color: #474747;
 float: right;
 clear: right;
 margin-right: -30%;
